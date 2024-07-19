@@ -1,0 +1,32 @@
+# running the commands from the cubix-cloudnative-block6-homework directory
+
+
+kubectl create ns cubix-hw6
+kubectl label ns cubix-hw6 monitoring=true
+
+kubectl apply -f .\Sixth\deploy.yaml -n cubix-hw6
+helm upgrade fifth .\Fifth\spring-cubix-hw5\ -f .\Fifth\native.yaml -n cubix-hw6 --install
+
+# adding SPRING_CONFIG_IMPORT environment variable to .\Fifth\native.yaml
+# creating configmap.yaml and modifying deployment.yaml in the .\Fifth\spring-cubix-hw5\templates\ directory
+helm upgrade fifth .\Fifth\spring-cubix-hw5\ -f .\Fifth\native.yaml -n cubix-hw6 --install
+    kubectl get pods -n cubix-hw6
+        # name of the pod for the fifth application: fifth-spring-cubix-hw5-68d7b4d4d-wtsln
+    kubectl logs pod/fifth-spring-cubix-hw5-68d7b4d4d-wtsln -n cubix-hw6
+        # no Spring Boot Banner ✓
+
+# adding TARGET_API_KEY environment variable to .\Fifth\spring-cubix-hw5\templates\deployment.yaml
+helm upgrade fifth .\Fifth\spring-cubix-hw5\ -f .\Fifth\native.yaml -n cubix-hw6 --install
+    # sending a request from Postman (http://other.cubix.localhost:8080/sixth?name=InsertYourNameHere) --> {"name":"Nice call!","number":6}
+
+# changing replicaCount to 2 in .\Fifth\spring-cubix-hw5\values.yaml and creating podmonitor.yaml in the chart templates directory
+helm upgrade fifth .\Fifth\spring-cubix-hw5\ -f .\Fifth\native.yaml -n cubix-hw6 --install
+
+# sending requests from Postman (http://other.cubix.localhost:8080/sixth?name=InsertYourNameHere) for 2 mintues
+    # checking grafana for metrics (see the screenshots)
+    # picking one log entry to analyze the traces
+        # The "fifth" application took 114.6 ms to process the request, with 112.78 ms spent waiting for the "sixth" application, so the "sixth" application is responsibe for more than 98 % of the processing time, making it the bottleneck of the process.
+        # see bottleneck.png
+
+
+kubectl delete ns cubix-hw6
